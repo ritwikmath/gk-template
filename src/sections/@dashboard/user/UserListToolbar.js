@@ -1,7 +1,8 @@
+import * as React from 'react';
 import PropTypes from 'prop-types';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
-import { Toolbar, Tooltip, IconButton, Typography, OutlinedInput, InputAdornment } from '@mui/material';
+import { Toolbar, Tooltip, IconButton, Typography, OutlinedInput, InputAdornment, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 // component
 import Iconify from '../../../components/iconify';
 
@@ -38,7 +39,8 @@ UserListToolbar.propTypes = {
   onFilterName: PropTypes.func,
 };
 
-export default function UserListToolbar({ numSelected, filterName, onFilterName }) {
+export default function UserListToolbar({ numSelected, filterName, onFilterName, filterTeam, onFilterTeam }) {
+
   return (
     <StyledRoot
       sx={{
@@ -48,36 +50,37 @@ export default function UserListToolbar({ numSelected, filterName, onFilterName 
         }),
       }}
     >
-      {numSelected > 0 ? (
-        <Typography component="div" variant="subtitle1">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <StyledSearch
-          value={filterName}
-          onChange={onFilterName}
-          placeholder="Search user..."
-          startAdornment={
-            <InputAdornment position="start">
-              <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
-            </InputAdornment>
-          }
-        />
-      )}
+      <StyledSearch
+        value={filterName}
+        onChange={onFilterName}
+        placeholder="Search user..."
+        startAdornment={
+          <InputAdornment position="start">
+            <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
+          </InputAdornment>
+        }
+      />
 
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <Iconify icon="eva:trash-2-fill" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <Iconify icon="ic:round-filter-list" />
-          </IconButton>
-        </Tooltip>
-      )}
+      <FormControl sx={{ width: '200px' }}>
+        <InputLabel id="demo-simple-select-label">Team</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={filterTeam}
+          label="Team"
+          onChange={onFilterTeam}
+        >
+          <MenuItem value="">
+            <em>All</em>
+          </MenuItem>
+          <MenuItem value="Management">Management</MenuItem>
+          <MenuItem value="Team A">Team A</MenuItem>
+          <MenuItem value="Team B">Team B</MenuItem>
+          <MenuItem value="Team C">Team C</MenuItem>
+          <MenuItem value="Team D">Team D</MenuItem>
+          <MenuItem value="Freelancing">Freelancing</MenuItem>
+        </Select>
+      </FormControl>
     </StyledRoot>
   );
 }

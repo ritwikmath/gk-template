@@ -27,14 +27,6 @@ export default function AppNewsUpdate({ title, subheader, list, ...other }) {
           ))}
         </Stack>
       </Scrollbar>
-
-      <Divider />
-
-      <Box sx={{ p: 2, textAlign: 'right' }}>
-        <Button size="small" color="inherit" endIcon={<Iconify icon={'eva:arrow-ios-forward-fill'} />}>
-          View all
-        </Button>
-      </Box>
     </Card>
   );
 }
@@ -43,15 +35,22 @@ export default function AppNewsUpdate({ title, subheader, list, ...other }) {
 
 NewsItem.propTypes = {
   news: PropTypes.shape({
-    description: PropTypes.string,
+    writer: PropTypes.string,
     image: PropTypes.string,
     postedAt: PropTypes.instanceOf(Date),
     title: PropTypes.string,
+    action: PropTypes.string
   }),
 };
 
 function NewsItem({ news }) {
-  const { image, title, description, postedAt } = news;
+  const { image, title, writer, postedAt, action } = news;
+  const colorScheme = {
+    'upload': '#2CF6B3',
+    'rework upload': '#009FFD',
+    'rework': '#FF6633',
+    'failed': '#FE2036' 
+  }
 
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
@@ -63,7 +62,7 @@ function NewsItem({ news }) {
         </Link>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-          {description}
+          {writer} <Typography variant='span' sx={{ color: colorScheme[action], fontStyle: 'italic' }}>{action}</Typography>
         </Typography>
       </Box>
 

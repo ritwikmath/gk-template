@@ -9,25 +9,34 @@ import LoginPage from './pages/LoginPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
+import ForgetPasswordPage from './pages/ForgetPasswordPage';
+import Protected from './components/Protected';
+import Public from './components/Public';
 
 // ----------------------------------------------------------------------
 
 export default function Router() {
+
   const routes = useRoutes([
     {
-      path: '/dashboard',
-      element: <DashboardLayout />,
+      path: '/',
+      element: <Protected><DashboardLayout /></Protected>,
       children: [
-        { element: <Navigate to="/dashboard/app" />, index: true },
-        { path: 'app', element: <DashboardAppPage /> },
+        { element: <Navigate to="/dashboard" />, index: true },
+        { path: 'dashboard', element: <DashboardAppPage /> },
         { path: 'user', element: <UserPage /> },
+        { path: 'order', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
       ],
     },
     {
       path: 'login',
-      element: <LoginPage />,
+      element: <Public><LoginPage /></Public>,
+    },
+    {
+      path: 'forgot-password',
+      element: <ForgetPasswordPage />,
     },
     {
       element: <SimpleLayout />,

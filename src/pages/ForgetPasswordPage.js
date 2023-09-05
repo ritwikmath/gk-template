@@ -8,7 +8,7 @@ import useResponsive from '../hooks/useResponsive';
 import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
-import { LoginForm } from '../sections/auth/login';
+import { ForgotPasswordForm } from '../sections/auth/forgot-password';
 
 // ----------------------------------------------------------------------
 
@@ -40,13 +40,13 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function LoginPage() {
+export default function ForgetPasswordPage() {
   const mdUp = useResponsive('up', 'md');
 
   return (
     <>
       <Helmet>
-        <title> Login | GK Writers </title>
+        <title> Forget Password | GK Writers </title>
       </Helmet>
 
       <StyledRoot>
@@ -61,7 +61,7 @@ export default function LoginPage() {
         {mdUp && (
           <StyledSection>
             <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
-              Hi, Welcome Back
+              Change Password Every Month
             </Typography>
             <img src="/assets/illustrations/illustration_login.png" alt="login" />
           </StyledSection>
@@ -70,13 +70,13 @@ export default function LoginPage() {
         <Container maxWidth="sm">
           <StyledContent>
             <Typography variant="h4" gutterBottom sx={{ fontSize: "40px !important", marginBottom: "5px" }}>
-              Sign in to GK Academic
+              Forgot Your Password?
             </Typography>
-            <Typography variant="p" gutterBottom sx={{ fontSize: "20px !important", marginBottom: "50px" }}>
-              A portal for internal task management
+            <Typography variant="p" gutterBottom sx={{ fontSize: "18px !important", marginBottom: "50px" }}>
+              Don't worry! change here
             </Typography>
 
-            <LoginForm />
+            <ForgotPasswordForm />
           </StyledContent>
         </Container>
       </StyledRoot>

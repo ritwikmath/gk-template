@@ -23,7 +23,11 @@ import {
   TablePagination,
 } from '@mui/material';
 // components
-import Label from '../components/label';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-regular-svg-icons';
+import { faChartLine, faPenNib } from '@fortawesome/free-solid-svg-icons';
+import UserModal from '../components/user-details';
+import UserAddModal from '../components/user-add';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
@@ -35,11 +39,11 @@ import USERLIST from '../_mock/user';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
+  { id: 'team', label: 'Team', alignRight: false },
   { id: 'role', label: 'Role', alignRight: false },
   { id: 'isVerified', label: 'Verified', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
-  { id: '' },
+  { id: 'word', label: 'Word', alignRight: false },
+  { id: 'action', label: 'Action'},
 ];
 
 // ----------------------------------------------------------------------
@@ -60,17 +64,23 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function applySortFilter(array, comparator, query) {
+function applySortFilter(array, comparator, { filterName, filterTeam }) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-  if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+  let filteredUsers = stabilizedThis.map((el) => el[0]);
+  if (filterName) {
+    filteredUsers = filter(filteredUsers, (_user) => _user.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1);
   }
-  return stabilizedThis.map((el) => el[0]);
+
+  if (filterTeam) {
+    filteredUsers = filter(filteredUsers, (_user) => _user.team.toLowerCase().indexOf(filterTeam.toLowerCase()) !== -1);
+  }
+
+  return filteredUsers;
 }
 
 export default function UserPage() {
@@ -85,14 +95,42 @@ export default function UserPage() {
   const [orderBy, setOrderBy] = useState('name');
 
   const [filterName, setFilterName] = useState('');
+  const [filterTeam, setFilterTeam] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [openDetails, setOpenDetails] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
+  const [openUpdate, setOpenUpdate] = useState(null);
+  const [actionUser, setActionUser] = useState(null);
+  
+  const handleDetailsOpen = (user) => {
+    if (openDetails) return;
+    setUserDetails(user);
+    setOpenDetails(true);
+  };
+  const handleDetailsClose = () => {
+    setUserDetails(null);
+    setOpenDetails(false)
+  };
 
-  const handleOpenMenu = (event) => {
+  const handleUpdateOpen = (user) => {
+    if (openUpdate) return;
+    console.log(user)
+    setUserDetails(user);
+    setOpenUpdate(true);
+  };
+  const handleUpdateClose = () => {
+    setUserDetails(null);
+    setOpenUpdate(false)
+  };
+
+  const handleOpenMenu = (event, user) => {
+    setActionUser(user)
     setOpen(event.currentTarget);
   };
 
   const handleCloseMenu = () => {
+    setActionUser(null)
     setOpen(null);
   };
 
@@ -100,30 +138,6 @@ export default function UserPage() {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = USERLIST.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -140,30 +154,43 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
+  const handleFilterByTeam = (event) => {
+    setPage(0);
+    setFilterTeam(event.target.value);
+  };
+
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
 
-  const filteredUsers = applySortFilter(USERLIST, getComparator(order, orderBy), filterName);
+  const filteredUsers = applySortFilter(USERLIST, getComparator(order, orderBy), { filterName, filterTeam });
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> User | GK Academic </title>
       </Helmet>
 
+      {openDetails && <UserModal user={userDetails} open={openDetails} handleClose={handleDetailsClose} />}
+      {openUpdate && <UserAddModal user={userDetails} open={openUpdate} handleClose={handleUpdateClose} />}
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             User
           </Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
+          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={() => handleUpdateOpen(null)}>
             New User
           </Button>
         </Stack>
 
         <Card>
-          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+          <UserListToolbar
+            numSelected={selected.length}
+            filterName={filterName}
+            onFilterName={handleFilterByName}
+            filterTeam={filterTeam}
+            onFilterTeam={handleFilterByTeam}
+          />
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
@@ -175,21 +202,16 @@ export default function UserPage() {
                   rowCount={USERLIST.length}
                   numSelected={selected.length}
                   onRequestSort={handleRequestSort}
-                  onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
                   {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, role, status, company, avatarUrl, isVerified } = row;
+                    const { id, name, role, word, team, avatarUrl, isVerified } = row;
                     const selectedUser = selected.indexOf(name) !== -1;
 
                     return (
                       <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
-                        <TableCell padding="checkbox">
-                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
-                        </TableCell>
-
                         <TableCell component="th" scope="row" padding="none">
-                          <Stack direction="row" alignItems="center" spacing={2}>
+                          <Stack direction="row" paddingLeft="10px" alignItems="center" spacing={2}>
                             <Avatar alt={name} src={avatarUrl} />
                             <Typography variant="subtitle2" noWrap>
                               {name}
@@ -197,18 +219,31 @@ export default function UserPage() {
                           </Stack>
                         </TableCell>
 
-                        <TableCell align="left">{company}</TableCell>
+                        <TableCell align="left">{team}</TableCell>
 
                         <TableCell align="left">{role}</TableCell>
 
                         <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell>
 
                         <TableCell align="left">
-                          <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
+                          {
+                            team.toLowerCase() === 'management' ?
+                              <Typography variant='span'>N/A</Typography>
+                              :
+                              <>
+                                <Typography variant='span'>{word}</Typography>
+                                <Typography variant='span' sx={{ cursor: 'pointer', marginLeft: '10px', color: '#4381C1' }} onClick={() => handleDetailsOpen(row)}>
+                                  <FontAwesomeIcon icon={faChartLine} />
+                                </Typography>
+                                <Typography variant='span' sx={{ cursor: 'pointer', marginLeft: '10px', color: '#0CA4A5' }}>
+                                  <FontAwesomeIcon icon={faPenNib} />
+                                </Typography>
+                              </>
+                          }
                         </TableCell>
 
                         <TableCell align="right">
-                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                          <IconButton size="large" color="inherit" onClick={(e) => handleOpenMenu(e, row)}>
                             <Iconify icon={'eva:more-vertical-fill'} />
                           </IconButton>
                         </TableCell>
@@ -279,7 +314,7 @@ export default function UserPage() {
           },
         }}
       >
-        <MenuItem>
+        <MenuItem onClick={() => handleUpdateOpen(actionUser)}>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
           Edit
         </MenuItem>
